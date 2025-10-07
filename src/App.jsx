@@ -6,7 +6,7 @@ import Clients from "@/components/pages/Clients";
 import Policies from "@/components/pages/Policies";
 import Claims from "@/components/pages/Claims";
 import Analytics from "@/components/pages/Analytics";
-
+import AgentPerformance from "@/components/pages/AgentPerformance";
 function App() {
   return (
     <BrowserRouter>
@@ -22,7 +22,7 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <Routes>
+<Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
@@ -30,6 +30,7 @@ function App() {
           <Route path="policies" element={<Policies />} />
           <Route path="claims" element={<Claims />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="agent-performance" element={<AgentPerformance />} />
         </Route>
       </Routes>
     </BrowserRouter>

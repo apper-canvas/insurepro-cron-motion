@@ -1,20 +1,22 @@
-import { NavLink } from "react-router-dom";
-import ApperIcon from "@/components/ApperIcon";
+import { NavLink, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
+import React from "react";
+import ApperIcon from "@/components/ApperIcon";
 
-const navItems = [
-  { path: "/dashboard", icon: "LayoutDashboard", label: "Dashboard" },
-  { path: "/clients", icon: "Users", label: "Clients" },
-  { path: "/policies", icon: "FileText", label: "Policies" },
-  { path: "/claims", icon: "ClipboardList", label: "Claims" },
-  { path: "/analytics", icon: "BarChart3", label: "Analytics" },
+const menuItems = [
+    { path: "/dashboard", icon: "LayoutDashboard", label: "Dashboard" },
+    { path: "/clients", icon: "Users", label: "Clients" },
+    { path: "/policies", icon: "FileText", label: "Policies" },
+    { path: "/claims", icon: "ClipboardList", label: "Claims" },
+    { path: "/analytics", icon: "BarChart3", label: "Analytics" },
+    { path: "/agent-performance", icon: "TrendingUp", label: "Agent Performance" },
 ];
 
 const Sidebar = () => {
   return (
-    <aside className="hidden lg:block w-64 bg-white border-r border-slate-200 h-screen sticky top-0 flex-shrink-0">
+<aside className="hidden lg:block w-64 bg-white border-r border-slate-200 h-screen sticky top-0 flex-shrink-0">
       <nav className="p-4 space-y-1">
-        {navItems.map((item) => (
+        {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}

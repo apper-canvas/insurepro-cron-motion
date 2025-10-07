@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import React from "react";
 import ApperIcon from "@/components/ApperIcon";
 
 const navItems = [
@@ -8,6 +9,7 @@ const navItems = [
   { path: "/policies", icon: "FileText", label: "Policies" },
   { path: "/claims", icon: "ClipboardList", label: "Claims" },
   { path: "/analytics", icon: "BarChart3", label: "Analytics" },
+  { path: "/agent-performance", icon: "TrendingUp", label: "Agent Performance" },
 ];
 
 const MobileSidebar = ({ isOpen, onClose }) => {

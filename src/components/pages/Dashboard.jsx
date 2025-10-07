@@ -18,6 +18,7 @@ const Dashboard = () => {
   const [expiringPolicies, setExpiringPolicies] = useState([]);
   const [pendingClaims, setPendingClaims] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [topAgents, setTopAgents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -25,19 +26,28 @@ const Dashboard = () => {
     loadDashboardData();
   }, []);
 
-  const loadDashboardData = async () => {
+const loadDashboardData = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const [metricsData, policies, claims, clients] = await Promise.all([
+      const [metricsData, policies, claims, clients, topPerformers] = await Promise.all([
         analyticsService.getCurrentMetrics(),
         policyService.getAll(),
         claimService.getAll(),
-        clientService.getAll()
+        clientService.getAll(),
+        (async () => {
+          try {
+            const { default: agentPerformanceService } = await import("@/services/api/agentPerformanceService");
+            return await agentPerformanceService.getTopPerformers(3);
+          } catch {
+            return [];
+          }
+        })()
       ]);
 
-      setMetrics(metricsData);
+setMetrics(metricsData);
+      setTopAgents(topPerformers);
 
       const expiring = policies
         .filter(p => p.status === "Expiring" || new Date(p.endDate) <= new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
@@ -196,7 +206,53 @@ const Dashboard = () => {
               })}
           </div>
         </div>
-      </div>
+</div>
+
+      {topAgents.length > 0 && (
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-gray-900">Top Performing Agents</h2>
+            <button
+              onClick={() => navigate("/agent-performance")}
+              className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              View All
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {topAgents.map((agent, index) => (
+              <div key={agent.Id} className="relative bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-4 border border-slate-200 hover:shadow-md transition-all">
+                <div className="absolute -top-2 -right-2 w-7 h-7 bg-gradient-to-br from-amber-400 to-amber-500 rounded-full flex items-center justify-center text-white font-bold text-xs shadow">
+                  #{index + 1}
+                </div>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-white font-bold">
+                    {agent.agentName.split(' ').map(n => n[0]).join('')}
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900">{agent.agentName}</p>
+                    <p className="text-xs text-slate-600">{agent.specialization}</p>
+                  </div>
+                </div>
+                <div className="space-y-1.5">
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600">Revenue:</span>
+                    <span className="font-semibold text-gray-900">${(agent.totalRevenue / 1000).toFixed(0)}K</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600">Policies:</span>
+                    <span className="font-semibold text-gray-900">{agent.policiesSold}</span>
+                  </div>
+                  <div className="flex justify-between text-xs">
+                    <span className="text-slate-600">Satisfaction:</span>
+                    <span className="font-semibold text-gray-900">{agent.clientSatisfaction}/5.0</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Activity</h2>
