@@ -1,0 +1,62 @@
+[
+  {
+    "Id": 1,
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "john.smith@email.com",
+    "phone": "(555) 123-4567",
+    "address": "123 Main St, Springfield, IL 62701",
+    "dateOfBirth": "1985-03-15",
+    "riskProfile": "Low",
+    "createdAt": "2023-01-15T10:30:00Z",
+    "status": "Active"
+  },
+  {
+    "Id": 2,
+    "firstName": "Sarah",
+    "lastName": "Johnson",
+    "email": "sarah.j@email.com",
+    "phone": "(555) 234-5678",
+    "address": "456 Oak Ave, Chicago, IL 60601",
+    "dateOfBirth": "1990-07-22",
+    "riskProfile": "Medium",
+    "createdAt": "2023-02-20T14:15:00Z",
+    "status": "Active"
+  },
+  {
+    "Id": 3,
+    "firstName": "Michael",
+    "lastName": "Brown",
+    "email": "m.brown@email.com",
+    "phone": "(555) 345-6789",
+    "address": "789 Pine Rd, Aurora, IL 60505",
+    "dateOfBirth": "1978-11-08",
+    "riskProfile": "High",
+    "createdAt": "2023-03-10T09:45:00Z",
+    "status": "Active"
+  },
+  {
+    "Id": 4,
+    "firstName": "Emily",
+    "lastName": "Davis",
+    "email": "emily.davis@email.com",
+    "phone": "(555) 456-7890",
+    "address": "321 Elm St, Naperville, IL 60540",
+    "dateOfBirth": "1992-05-18",
+    "riskProfile": "Low",
+    "createdAt": "2023-04-05T11:20:00Z",
+    "status": "Active"
+  },
+  {
+    "Id": 5,
+    "firstName": "David",
+    "lastName": "Wilson",
+    "email": "d.wilson@email.com",
+    "phone": "(555) 567-8901",
+    "address": "654 Maple Dr, Joliet, IL 60432",
+    "dateOfBirth": "1988-09-25",
+    "riskProfile": "Medium",
+    "createdAt": "2023-05-12T16:00:00Z",
+    "status": "Inactive"
+  }
+]

@@ -1,0 +1,86 @@
+[
+  {
+    "Id": 1,
+    "clientId": 1,
+    "policyNumber": "POL-2023-001",
+    "type": "Auto Insurance",
+    "coverage": {
+      "liability": "$100,000",
+      "collision": "$50,000",
+      "comprehensive": "$50,000"
+    },
+    "premium": 1200,
+    "startDate": "2023-01-20",
+    "endDate": "2024-01-20",
+    "status": "Active",
+    "renewalDate": "2024-01-20",
+    "createdAt": "2023-01-15T10:30:00Z"
+  },
+  {
+    "Id": 2,
+    "clientId": 2,
+    "policyNumber": "POL-2023-002",
+    "type": "Home Insurance",
+    "coverage": {
+      "dwelling": "$300,000",
+      "personal": "$150,000",
+      "liability": "$100,000"
+    },
+    "premium": 1800,
+    "startDate": "2023-02-25",
+    "endDate": "2024-02-25",
+    "status": "Active",
+    "renewalDate": "2024-02-25",
+    "createdAt": "2023-02-20T14:15:00Z"
+  },
+  {
+    "Id": 3,
+    "clientId": 3,
+    "policyNumber": "POL-2023-003",
+    "type": "Life Insurance",
+    "coverage": {
+      "death": "$500,000",
+      "accidental": "$1,000,000"
+    },
+    "premium": 2400,
+    "startDate": "2023-03-15",
+    "endDate": "2024-03-15",
+    "status": "Active",
+    "renewalDate": "2024-03-15",
+    "createdAt": "2023-03-10T09:45:00Z"
+  },
+  {
+    "Id": 4,
+    "clientId": 4,
+    "policyNumber": "POL-2023-004",
+    "type": "Auto Insurance",
+    "coverage": {
+      "liability": "$75,000",
+      "collision": "$40,000",
+      "comprehensive": "$40,000"
+    },
+    "premium": 950,
+    "startDate": "2023-04-10",
+    "endDate": "2024-01-10",
+    "status": "Expiring",
+    "renewalDate": "2024-01-10",
+    "createdAt": "2023-04-05T11:20:00Z"
+  },
+  {
+    "Id": 5,
+    "clientId": 1,
+    "policyNumber": "POL-2023-005",
+    "type": "Home Insurance",
+    "coverage": {
+      "dwelling": "$250,000",
+      "personal": "$125,000",
+      "liability": "$75,000"
+    },
+    "premium": 1500,
+    "startDate": "2023-05-20",
+    "endDate": "2024-05-20",
+    "status": "Active",
+    "renewalDate": "2024-05-20",
+    "createdAt": "2023-05-12T16:00:00Z"
+  }
+]

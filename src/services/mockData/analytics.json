@@ -1,0 +1,47 @@
+[
+  {
+    "date": "2023-11-01",
+    "totalPremiums": 125000,
+    "totalClaims": 35000,
+    "lossRatio": 0.28,
+    "activePolicies": 248,
+    "newPolicies": 12,
+    "renewalRate": 0.87
+  },
+  {
+    "date": "2023-11-02",
+    "totalPremiums": 128000,
+    "totalClaims": 38000,
+    "lossRatio": 0.297,
+    "activePolicies": 252,
+    "newPolicies": 8,
+    "renewalRate": 0.89
+  },
+  {
+    "date": "2023-11-03",
+    "totalPremiums": 132000,
+    "totalClaims": 41000,
+    "lossRatio": 0.311,
+    "activePolicies": 255,
+    "newPolicies": 15,
+    "renewalRate": 0.86
+  },
+  {
+    "date": "2023-11-04",
+    "totalPremiums": 127000,
+    "totalClaims": 36000,
+    "lossRatio": 0.283,
+    "activePolicies": 258,
+    "newPolicies": 10,
+    "renewalRate": 0.88
+  },
+  {
+    "date": "2023-11-05",
+    "totalPremiums": 135000,
+    "totalClaims": 42000,
+    "lossRatio": 0.311,
+    "activePolicies": 262,
+    "newPolicies": 18,
+    "renewalRate": 0.91
+  }
+]
