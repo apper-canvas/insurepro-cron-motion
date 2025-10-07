@@ -29,10 +29,12 @@ const claimService = {
 
   create: async (claimData) => {
     await delay(400);
-    const maxId = claims.reduce((max, c) => Math.max(max, c.Id), 0);
+const maxId = claims.reduce((max, c) => Math.max(max, c.Id), 0);
     
     const fraudScore = calculateFraudScore(claimData);
     const fraudFlags = determineFraudFlags(claimData, fraudScore);
+    const riskMultiplier = fraudScore > 60 ? 1.2 : fraudScore > 30 ? 1.1 : 1.0;
+    const reserveAmount = Math.round(claimData.amountRequested * riskMultiplier);
     
     const newClaim = {
       ...claimData,
@@ -41,6 +43,7 @@ const claimService = {
       status: fraudScore > 50 ? "Pending" : "Pending",
       fraudScore,
       fraudFlags,
+      reserveAmount,
       submittedAt: new Date().toISOString(),
       processedAt: null
     };
@@ -63,8 +66,9 @@ const claimService = {
     claims[index] = {
       ...claims[index],
       status: "Approved",
-      amountApproved: approvedAmount,
-      processedAt: new Date().toISOString()
+amountApproved: approvedAmount,
+      processedAt: new Date().toISOString(),
+      reserveAmount: Math.max(0, claims[index].amountRequested - approvedAmount)
     };
     return { ...claims[index] };
   },
@@ -75,9 +79,10 @@ const claimService = {
     if (index === -1) throw new Error("Claim not found");
     claims[index] = {
       ...claims[index],
-      status: "Denied",
+status: "Denied",
       amountApproved: 0,
       denialReason: reason,
+      reserveAmount: 0,
       processedAt: new Date().toISOString()
     };
     return { ...claims[index] };

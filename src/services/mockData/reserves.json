@@ -1,0 +1,35 @@
+[
+  {
+    "Id": 1,
+    "claimId": 2,
+    "adjustmentType": "increase",
+    "adjustmentAmount": 1500,
+    "previousReserve": 8500,
+    "newReserve": 10000,
+    "reason": "Additional damage assessment revealed more extensive repairs needed",
+    "adjustedBy": "Claims Adjuster - Sarah Johnson",
+    "adjustedAt": "2023-11-23T14:30:00Z"
+  },
+  {
+    "Id": 2,
+    "claimId": 4,
+    "adjustmentType": "increase",
+    "adjustmentAmount": 800,
+    "previousReserve": 3200,
+    "newReserve": 4000,
+    "reason": "Parts pricing increased due to supply chain issues",
+    "adjustedBy": "Claims Manager - Michael Chen",
+    "adjustedAt": "2023-11-28T10:15:00Z"
+  },
+  {
+    "Id": 3,
+    "claimId": 1,
+    "adjustmentType": "decrease",
+    "adjustmentAmount": 300,
+    "previousReserve": 2500,
+    "newReserve": 2200,
+    "reason": "Final repair costs lower than initial estimate",
+    "adjustedBy": "Claims Adjuster - Sarah Johnson",
+    "adjustedAt": "2023-11-18T16:45:00Z"
+  }
+]

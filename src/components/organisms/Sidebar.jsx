@@ -8,6 +8,7 @@ const menuItems = [
     { path: "/clients", icon: "Users", label: "Clients" },
     { path: "/policies", icon: "FileText", label: "Policies" },
     { path: "/claims", icon: "ClipboardList", label: "Claims" },
+    { path: "/reserves", icon: "Shield", label: "Reserves" },
     { path: "/analytics", icon: "BarChart3", label: "Analytics" },
     { path: "/agent-performance", icon: "TrendingUp", label: "Agent Performance" },
 ];

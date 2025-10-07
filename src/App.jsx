@@ -1,12 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import Layout from "@/components/organisms/Layout";
-import Dashboard from "@/components/pages/Dashboard";
-import Clients from "@/components/pages/Clients";
+import Reserves from "@/components/pages/Reserves";
+import React from "react";
 import Policies from "@/components/pages/Policies";
-import Claims from "@/components/pages/Claims";
 import Analytics from "@/components/pages/Analytics";
+import Clients from "@/components/pages/Clients";
 import AgentPerformance from "@/components/pages/AgentPerformance";
+import Claims from "@/components/pages/Claims";
+import Dashboard from "@/components/pages/Dashboard";
+import Layout from "@/components/organisms/Layout";
 function App() {
   return (
     <BrowserRouter>
@@ -31,6 +33,7 @@ function App() {
           <Route path="claims" element={<Claims />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="agent-performance" element={<AgentPerformance />} />
+<Route path="reserves" element={<Reserves />} />
         </Route>
       </Routes>
     </BrowserRouter>

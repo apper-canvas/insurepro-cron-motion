@@ -11,6 +11,7 @@
     "status": "Approved",
     "fraudScore": 15,
     "fraudFlags": [],
+    "reserveAmount": 300,
     "submittedAt": "2023-11-16T10:30:00Z",
     "processedAt": "2023-11-18T14:20:00Z"
   },
@@ -26,6 +27,7 @@
     "status": "Pending",
     "fraudScore": 32,
     "fraudFlags": ["High amount", "Recent policy"],
+    "reserveAmount": 9350,
     "submittedAt": "2023-11-21T09:15:00Z",
     "processedAt": null
   },
@@ -41,6 +43,7 @@
     "status": "Approved",
     "fraudScore": 8,
     "fraudFlags": [],
+    "reserveAmount": 0,
     "submittedAt": "2023-11-11T13:45:00Z",
     "processedAt": "2023-11-12T16:30:00Z"
   },
@@ -56,6 +59,7 @@
     "status": "Pending",
     "fraudScore": 22,
     "fraudFlags": ["Multiple claims"],
+    "reserveAmount": 3200,
     "submittedAt": "2023-11-26T11:00:00Z",
     "processedAt": null
   },
@@ -71,6 +75,7 @@
     "status": "Denied",
     "fraudScore": 78,
     "fraudFlags": ["High amount", "Suspicious timing", "Incomplete documentation"],
+    "reserveAmount": 0,
     "submittedAt": "2023-10-20T08:30:00Z",
     "processedAt": "2023-10-25T15:45:00Z"
   }
