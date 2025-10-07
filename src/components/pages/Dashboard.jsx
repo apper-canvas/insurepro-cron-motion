@@ -16,7 +16,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [metrics, setMetrics] = useState(null);
   const [expiringPolicies, setExpiringPolicies] = useState([]);
-  const [pendingClaims, setPendingClaims] = useState([]);
+const [pendingClaims, setPendingClaims] = useState([]);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
   const [topAgents, setTopAgents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -54,15 +55,27 @@ setMetrics(metricsData);
         .slice(0, 5);
       setExpiringPolicies(expiring);
 
-      const pending = claims.filter(c => c.status === "Pending").slice(0, 5);
+const pending = claims.filter(c => 
+        c.status === "Pending L1" || 
+        c.status === "Pending L2" || 
+        c.status === "Pending L3"
+      ).slice(0, 5);
       setPendingClaims(pending);
 
-      const activities = [
+      // Compute pending approvals by level
+      const approvalsByLevel = {
+        L1: claims.filter(c => c.status === "Pending L1").length,
+        L2: claims.filter(c => c.status === "Pending L2").length,
+        L3: claims.filter(c => c.status === "Pending L3").length
+      };
+      setPendingApprovals(approvalsByLevel);
+
+const activities = [
         ...claims.slice(0, 3).map(c => ({
           type: "claim",
           icon: "ClipboardList",
           title: `Claim ${c.status}`,
-          description: `Claim #${c.Id} - $${c.amountRequested.toLocaleString()}`,
+          description: `Claim #${c.Id} - $${c.amountRequested.toLocaleString()} (${c.workflowLevel})`,
           timestamp: c.submittedAt,
           status: c.status
         })),

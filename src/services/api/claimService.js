@@ -1,5 +1,11 @@
 import claimsData from "@/services/mockData/claims.json";
-let claims = [...claimsData];
+
+// Initialize claims with workflow properties
+let claims = claimsData.map(claim => ({
+  ...claim,
+  workflowLevel: claim.workflowLevel || determineWorkflowLevel(claim),
+  approvalHistory: claim.approvalHistory || []
+}));
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -26,9 +32,9 @@ const claimService = {
     return claims.filter(c => c.policyId === parseInt(policyId)).map(c => ({ ...c }));
   },
 
-  create: async (claimData) => {
-await delay(400);
-const maxId = claims.reduce((max, c) => Math.max(max, c.Id), 0);
+create: async (claimData) => {
+    await delay(400);
+    const maxId = claims.reduce((max, c) => Math.max(max, c.Id), 0);
     
     const { score: fraudScore, factors: fraudFactors } = calculateFraudScore(claimData);
     const confidenceLevel = calculateConfidenceLevel(claimData, fraudFactors);
@@ -40,14 +46,16 @@ const maxId = claims.reduce((max, c) => Math.max(max, c.Id), 0);
       ...claimData,
       Id: maxId + 1,
       amountApproved: 0,
-      status: fraudScore > 50 ? "Pending" : "Pending",
       fraudScore,
       confidenceLevel,
       fraudFactors,
       fraudFlags,
       reserveAmount,
       submittedAt: new Date().toISOString(),
-      processedAt: null
+      processedAt: null,
+      workflowLevel: determineWorkflowLevel({ ...claimData, fraudScore }),
+      status: "Pending L1",
+      approvalHistory: []
     };
     claims.push(newClaim);
     return { ...newClaim };
@@ -61,31 +69,67 @@ const maxId = claims.reduce((max, c) => Math.max(max, c.Id), 0);
     return { ...claims[index] };
   },
 
-  approve: async (id, approvedAmount) => {
-    await delay(300);
-    const index = claims.findIndex(c => c.Id === parseInt(id));
-    if (index === -1) throw new Error("Claim not found");
-    claims[index] = {
-      ...claims[index],
-      status: "Approved",
-amountApproved: approvedAmount,
-      processedAt: new Date().toISOString(),
-      reserveAmount: Math.max(0, claims[index].amountRequested - approvedAmount)
-    };
-    return { ...claims[index] };
-  },
 
-  deny: async (id, reason) => {
+denyWorkflow: async (id, approverRole, reason) => {
     await delay(300);
     const index = claims.findIndex(c => c.Id === parseInt(id));
     if (index === -1) throw new Error("Claim not found");
+    
+    const claim = claims[index];
+    const approvalHistory = [...(claim.approvalHistory || [])];
+    
+    approvalHistory.push({
+      action: "denied",
+      approver: approverRole,
+      approvalLevel: claim.workflowLevel,
+      reason: reason,
+      timestamp: new Date().toISOString()
+    });
+
     claims[index] = {
-      ...claims[index],
-status: "Denied",
+      ...claim,
+      status: "Denied",
+      approvalHistory,
       amountApproved: 0,
       denialReason: reason,
       reserveAmount: 0,
       processedAt: new Date().toISOString()
+    };
+    return { ...claims[index] };
+  },
+
+  escalateWorkflow: async (id, approverRole, reason) => {
+    await delay(300);
+    const index = claims.findIndex(c => c.Id === parseInt(id));
+    if (index === -1) throw new Error("Claim not found");
+    
+    const claim = claims[index];
+    const approvalHistory = [...(claim.approvalHistory || [])];
+    
+    approvalHistory.push({
+      action: "escalated",
+      approver: approverRole,
+      approvalLevel: claim.workflowLevel,
+      reason: reason,
+      timestamp: new Date().toISOString()
+    });
+
+    // Determine next level
+    let nextLevel = claim.workflowLevel;
+    let nextStatus = claim.status;
+    if (claim.workflowLevel === "L1") {
+      nextLevel = "L2";
+      nextStatus = "Pending L2";
+    } else if (claim.workflowLevel === "L2") {
+      nextLevel = "L3";
+      nextStatus = "Pending L3";
+    }
+
+    claims[index] = {
+      ...claim,
+      workflowLevel: nextLevel,
+      status: nextStatus,
+      approvalHistory
     };
     return { ...claims[index] };
   },
@@ -98,6 +142,24 @@ status: "Denied",
     return true;
   }
 };
+
+function determineWorkflowLevel(claimData) {
+  const amount = claimData.amountRequested;
+  const fraudScore = claimData.fraudScore || 0;
+  
+  // High risk or high amount claims go to L3
+  if (amount > 50000 || fraudScore > 60) {
+    return "L3";
+  }
+  
+  // Medium amount or medium risk go to L2
+  if (amount >= 10000 || fraudScore > 30) {
+    return "L2";
+  }
+  
+  // Low amount and low risk go to L1
+  return "L1";
+}
 
 function calculateFraudScore(claimData) {
   const factors = getFraudFactors(claimData);
@@ -225,7 +287,7 @@ function getFraudFactors(claimData) {
     }
   }
   
-// Cap each factor at 100
+  // Cap each factor at 100
   Object.keys(factors).forEach(key => {
     factors[key].score = Math.min(100, factors[key].score);
   });

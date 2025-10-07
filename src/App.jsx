@@ -7,6 +7,7 @@ import Analytics from "@/components/pages/Analytics";
 import Clients from "@/components/pages/Clients";
 import AgentPerformance from "@/components/pages/AgentPerformance";
 import Claims from "@/components/pages/Claims";
+import ApprovalWorkflows from "@/components/pages/ApprovalWorkflows";
 import Dashboard from "@/components/pages/Dashboard";
 import Layout from "@/components/organisms/Layout";
 function App() {
@@ -31,9 +32,10 @@ function App() {
           <Route path="clients" element={<Clients />} />
           <Route path="policies" element={<Policies />} />
           <Route path="claims" element={<Claims />} />
+          <Route path="approval-workflows" element={<ApprovalWorkflows />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="agent-performance" element={<AgentPerformance />} />
-<Route path="reserves" element={<Reserves />} />
+          <Route path="reserves" element={<Reserves />} />
         </Route>
       </Routes>
     </BrowserRouter>

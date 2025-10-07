@@ -28,7 +28,7 @@ const Claims = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
 
-const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     policyId: "",
     clientId: "",
     incidentDate: "",
@@ -97,11 +97,11 @@ const [formData, setFormData] = useState({
     }
   };
 
-  const handleApproveClaim = async (claimId, amount) => {
+const handleApproveClaim = async (claimId, amount) => {
     try {
-await claimService.approve(claimId, amount);
+      await claimService.approveWorkflow(claimId, "SYSTEM", "Approved via Claims interface");
       const claim = claims.find(c => c.Id === claimId);
-      toast.success(`Claim approved! Confidence: ${claim?.confidenceLevel || 0}%`);
+      toast.success(`Claim workflow initiated! Level: ${claim?.workflowLevel}`);
       setShowDetailModal(false);
       loadData();
     } catch (err) {
@@ -109,9 +109,9 @@ await claimService.approve(claimId, amount);
     }
   };
 
-const handleDenyClaim = async (claimId) => {
+  const handleDenyClaim = async (claimId) => {
     try {
-      await claimService.deny(claimId, "Does not meet policy requirements");
+      await claimService.denyWorkflow(claimId, "SYSTEM", "Does not meet policy requirements");
       toast.success("Claim denied");
       setShowDetailModal(false);
       loadData();
@@ -207,20 +207,28 @@ const getRiskLevel = (score, confidence) => {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-slate-200">
+<tr className="border-b-2 border-slate-200">
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Claim ID</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Client</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Policy</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Amount</th>
-<th className="text-left py-3 px-4 font-semibold text-slate-700">Risk Assessment</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Workflow Level</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Risk Assessment</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Confidence</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredClaims.map((claim) => {
-const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
+{filteredClaims.map((claim) => {
+                  const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
+                  const levelMap = {
+                    "L1": { variant: "success", label: "Level 1" },
+                    "L2": { variant: "warning", label: "Level 2" },
+                    "L3": { variant: "danger", label: "Level 3" }
+                  };
+                  const levelBadge = levelMap[claim.workflowLevel] || { variant: "default", label: claim.workflowLevel };
+
                   return (
                     <tr key={claim.Id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4">
@@ -230,6 +238,9 @@ const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
                       <td className="py-3 px-4 text-slate-600">{getPolicyNumber(claim.policyId)}</td>
                       <td className="py-3 px-4">
                         <span className="font-semibold text-gray-900">${claim.amountRequested.toLocaleString()}</span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <Badge variant={levelBadge.variant}>{levelBadge.label}</Badge>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
@@ -343,7 +354,7 @@ const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
         </form>
       </Modal>
 
-      <Modal
+<Modal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         title={`Claim #${selectedClaim?.Id} Details`}
@@ -360,6 +371,26 @@ const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
                 <div>
                   <label className="text-sm font-medium text-slate-600">Policy</label>
                   <p className="text-gray-900 mt-1 font-semibold">{getPolicyNumber(selectedClaim.policyId)}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-600">Workflow Level</label>
+                  <Badge variant={
+                    selectedClaim.workflowLevel === "L3" ? "danger" : 
+                    selectedClaim.workflowLevel === "L2" ? "warning" : 
+                    "success"
+                  } className="mt-1">
+                    {selectedClaim.workflowLevel}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-slate-600">Current Status</label>
+                  <Badge variant={
+                    selectedClaim.status === "Approved" ? "success" : 
+                    selectedClaim.status === "Denied" ? "danger" : 
+                    "warning"
+                  } className="mt-1">
+                    {selectedClaim.status}
+                  </Badge>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-slate-600">Incident Date</label>
@@ -394,7 +425,7 @@ const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
               )}
             </div>
 
-<div className="bg-gradient-to-br from-amber-50 to-red-50 rounded-xl p-6 border-2 border-amber-200">
+            <div className="bg-gradient-to-br from-amber-50 to-red-50 rounded-xl p-6 border-2 border-amber-200">
               <div className="flex items-center gap-3 mb-4">
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).color === "red" ? "bg-gradient-to-br from-red-500 to-red-600" : getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).color === "amber" ? "bg-gradient-to-br from-amber-500 to-amber-600" : "bg-gradient-to-br from-green-500 to-green-600"}`}>
                   <ApperIcon name="AlertTriangle" size={24} className="text-white" />
@@ -496,7 +527,33 @@ const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
               )}
             </div>
 
-            {selectedClaim.status === "Pending" && (
+            {/* Approval History */}
+            {selectedClaim.approvalHistory && selectedClaim.approvalHistory.length > 0 && (
+              <div className="border border-slate-200 rounded-xl p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Approval History</h3>
+                <div className="space-y-3">
+                  {selectedClaim.approvalHistory.map((history, index) => (
+                    <div key={index} className="flex items-start gap-3 border-l-4 border-primary-500 pl-4 py-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant={history.action === "approved" ? "success" : history.action === "denied" ? "danger" : "warning"}>
+                            {history.action.toUpperCase()}
+                          </Badge>
+                          <span className="text-sm font-medium text-slate-700">{history.approvalLevel}</span>
+                          <span className="text-xs text-slate-500">by {history.approver}</span>
+                        </div>
+                        <p className="text-sm text-slate-600">{history.reason}</p>
+                        <p className="text-xs text-slate-500 mt-1">
+                          {format(new Date(history.timestamp), "MMM dd, yyyy 'at' h:mm a")}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(selectedClaim.status === "Pending L1" || selectedClaim.status === "Pending L2" || selectedClaim.status === "Pending L3") && (
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                 <Button variant="danger" onClick={() => handleDenyClaim(selectedClaim.Id)}>
                   <ApperIcon name="X" size={18} />
@@ -504,7 +561,7 @@ const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
                 </Button>
                 <Button onClick={() => handleApproveClaim(selectedClaim.Id, selectedClaim.amountRequested)}>
                   <ApperIcon name="CheckCircle" size={18} />
-                  Approve Claim
+                  Approve (Start Workflow)
                 </Button>
               </div>
             )}
