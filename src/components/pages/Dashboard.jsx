@@ -168,7 +168,7 @@ setMetrics(metricsData);
 
         <div className="bg-white rounded-xl shadow-md p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900">Fraud Alerts</h2>
+<h2 className="text-xl font-bold text-gray-900">Fraud Alerts</h2>
             <button
               onClick={() => navigate("/claims")}
               className="text-sm text-primary-600 hover:text-primary-700 font-medium"
@@ -179,13 +179,20 @@ setMetrics(metricsData);
           <div className="space-y-3">
             {pendingClaims
               .filter(c => c.fraudScore > 30)
+              .sort((a, b) => {
+                const scoreA = a.fraudScore * ((a.confidenceLevel || 50) / 100);
+                const scoreB = b.fraudScore * ((b.confidenceLevel || 50) / 100);
+                return scoreB - scoreA;
+              })
               .slice(0, 5)
               .map((claim) => {
+                const confidence = claim.confidenceLevel || 50;
                 const riskLevel = claim.fraudScore > 60 ? "high" : claim.fraudScore > 30 ? "medium" : "low";
                 const riskColor = riskLevel === "high" ? "red" : riskLevel === "medium" ? "amber" : "green";
+                const confidenceLevel = confidence >= 70 ? "high" : confidence >= 40 ? "medium" : "low";
                 
                 return (
-                  <div key={claim.Id} className={`flex items-center justify-between p-3 bg-${riskColor}-50 rounded-lg border border-${riskColor}-200 hover:bg-${riskColor}-100 transition-colors`}>
+                  <div key={claim.Id} className={`flex items-center justify-between p-3 bg-${riskColor}-50 rounded-lg border border-${riskColor}-200 hover:bg-${riskColor}-100 transition-colors cursor-pointer`} onClick={() => navigate("/claims")}>
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 bg-gradient-to-br from-${riskColor}-500 to-${riskColor}-600 rounded-lg flex items-center justify-center`}>
                         <ApperIcon name="AlertTriangle" size={20} className="text-white" />
@@ -196,10 +203,18 @@ setMetrics(metricsData);
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">Risk: {claim.fraudScore}%</p>
-                      <Badge variant={riskLevel === "high" ? "danger" : "warning"}>
-                        {riskLevel.toUpperCase()}
-                      </Badge>
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="text-sm font-medium text-gray-900">Risk: {claim.fraudScore}%</p>
+                        <Badge variant={riskLevel === "high" ? "danger" : "warning"}>
+                          {riskLevel.toUpperCase()}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-slate-600">Confidence:</span>
+                        <Badge variant={confidenceLevel === "high" ? "success" : confidenceLevel === "medium" ? "warning" : "danger"}>
+                          {confidence}%
+                        </Badge>
+                      </div>
                     </div>
                   </div>
                 );

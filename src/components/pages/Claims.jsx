@@ -28,13 +28,15 @@ const Claims = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedClaim, setSelectedClaim] = useState(null);
 
-  const [formData, setFormData] = useState({
+const [formData, setFormData] = useState({
     policyId: "",
     clientId: "",
     incidentDate: "",
     description: "",
     amountRequested: 0,
-    photos: []
+    photos: [],
+    claimDate: new Date().toISOString(),
+    claimHistory: 0
   });
 
   useEffect(() => {
@@ -97,8 +99,9 @@ const Claims = () => {
 
   const handleApproveClaim = async (claimId, amount) => {
     try {
-      await claimService.approve(claimId, amount);
-      toast.success("Claim approved successfully!");
+await claimService.approve(claimId, amount);
+      const claim = claims.find(c => c.Id === claimId);
+      toast.success(`Claim approved! Confidence: ${claim?.confidenceLevel || 0}%`);
       setShowDetailModal(false);
       loadData();
     } catch (err) {
@@ -106,7 +109,7 @@ const Claims = () => {
     }
   };
 
-  const handleDenyClaim = async (claimId) => {
+const handleDenyClaim = async (claimId) => {
     try {
       await claimService.deny(claimId, "Does not meet policy requirements");
       toast.success("Claim denied");
@@ -118,13 +121,15 @@ const Claims = () => {
   };
 
   const resetForm = () => {
-    setFormData({
+setFormData({
       policyId: "",
       clientId: "",
       incidentDate: "",
       description: "",
       amountRequested: 0,
-      photos: []
+      photos: [],
+      claimDate: new Date().toISOString(),
+      claimHistory: 0
     });
   };
 
@@ -138,10 +143,19 @@ const Claims = () => {
     return policy ? policy.policyNumber : "Unknown";
   };
 
-  const getRiskLevel = (score) => {
-    if (score > 60) return { level: "high", color: "red", label: "HIGH RISK" };
-    if (score > 30) return { level: "medium", color: "amber", label: "MEDIUM" };
-    return { level: "low", color: "green", label: "LOW" };
+const getRiskLevel = (score, confidence) => {
+    const isHighConfidence = confidence >= 70;
+    if (score > 60) return { 
+      level: "high", 
+      color: "red", 
+      label: isHighConfidence ? "HIGH RISK" : "PROBABLE RISK" 
+    };
+    if (score > 30) return { 
+      level: "medium", 
+      color: "amber", 
+      label: isHighConfidence ? "MEDIUM RISK" : "POSSIBLE RISK" 
+    };
+    return { level: "low", color: "green", label: "LOW RISK" };
   };
 
   if (loading) return <Loading />;
@@ -198,14 +212,15 @@ const Claims = () => {
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Client</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Policy</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Amount</th>
-                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Fraud Score</th>
+<th className="text-left py-3 px-4 font-semibold text-slate-700">Risk Assessment</th>
+                  <th className="text-left py-3 px-4 font-semibold text-slate-700">Confidence</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Status</th>
                   <th className="text-left py-3 px-4 font-semibold text-slate-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredClaims.map((claim) => {
-                  const risk = getRiskLevel(claim.fraudScore);
+const risk = getRiskLevel(claim.fraudScore, claim.confidenceLevel || 0);
                   return (
                     <tr key={claim.Id} className="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                       <td className="py-3 px-4">
@@ -222,6 +237,17 @@ const Claims = () => {
                             {risk.label}
                           </Badge>
                           <span className="text-sm text-slate-600">{claim.fraudScore}%</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div 
+                              className={`h-full ${(claim.confidenceLevel || 0) >= 70 ? 'bg-green-500' : (claim.confidenceLevel || 0) >= 40 ? 'bg-amber-500' : 'bg-red-500'}`}
+                              style={{ width: `${claim.confidenceLevel || 0}%` }}
+                            />
+                          </div>
+                          <span className="text-sm font-medium text-slate-700">{claim.confidenceLevel || 0}%</span>
                         </div>
                       </td>
                       <td className="py-3 px-4">
@@ -368,31 +394,97 @@ const Claims = () => {
               )}
             </div>
 
-            <div className="bg-gradient-to-br from-amber-50 to-red-50 rounded-xl p-6 border-2 border-amber-200">
+<div className="bg-gradient-to-br from-amber-50 to-red-50 rounded-xl p-6 border-2 border-amber-200">
               <div className="flex items-center gap-3 mb-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getRiskLevel(selectedClaim.fraudScore).color === "red" ? "bg-gradient-to-br from-red-500 to-red-600" : getRiskLevel(selectedClaim.fraudScore).color === "amber" ? "bg-gradient-to-br from-amber-500 to-amber-600" : "bg-gradient-to-br from-green-500 to-green-600"}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).color === "red" ? "bg-gradient-to-br from-red-500 to-red-600" : getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).color === "amber" ? "bg-gradient-to-br from-amber-500 to-amber-600" : "bg-gradient-to-br from-green-500 to-green-600"}`}>
                   <ApperIcon name="AlertTriangle" size={24} className="text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">AI Fraud Analysis</h3>
-                  <p className="text-sm text-slate-600">Automated risk assessment</p>
+                  <h3 className="text-lg font-semibold text-gray-900">Advanced Fraud Analysis</h3>
+                  <p className="text-sm text-slate-600">Multi-factor risk assessment</p>
                 </div>
               </div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-700">Risk Score</span>
-                <Badge variant={getRiskLevel(selectedClaim.fraudScore).level === "high" ? "danger" : getRiskLevel(selectedClaim.fraudScore).level === "medium" ? "warning" : "success"}>
-                  {getRiskLevel(selectedClaim.fraudScore).label}
-                </Badge>
+
+              {/* Risk Score and Confidence */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-700">Risk Score</span>
+                    <Badge variant={getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).level === "high" ? "danger" : getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).level === "medium" ? "warning" : "success"}>
+                      {getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).label}
+                    </Badge>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-3">
+                    <div
+                      className={`h-3 rounded-full transition-all duration-500 ${getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).color === "red" ? "bg-gradient-to-r from-red-500 to-red-600" : getRiskLevel(selectedClaim.fraudScore, selectedClaim.confidenceLevel || 0).color === "amber" ? "bg-gradient-to-r from-amber-500 to-amber-600" : "bg-gradient-to-r from-green-500 to-green-600"}`}
+                      style={{ width: `${selectedClaim.fraudScore}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1">{selectedClaim.fraudScore}% fraud risk</p>
+                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-slate-700">Confidence Level</span>
+                    <Badge variant={(selectedClaim.confidenceLevel || 0) >= 70 ? "success" : (selectedClaim.confidenceLevel || 0) >= 40 ? "warning" : "danger"}>
+                      {(selectedClaim.confidenceLevel || 0) >= 70 ? "HIGH" : (selectedClaim.confidenceLevel || 0) >= 40 ? "MEDIUM" : "LOW"}
+                    </Badge>
+                  </div>
+                  <div className="w-full bg-slate-200 rounded-full h-3">
+                    <div
+                      className={`h-3 rounded-full transition-all duration-500 ${(selectedClaim.confidenceLevel || 0) >= 70 ? "bg-gradient-to-r from-green-500 to-green-600" : (selectedClaim.confidenceLevel || 0) >= 40 ? "bg-gradient-to-r from-amber-500 to-amber-600" : "bg-gradient-to-r from-red-500 to-red-600"}`}
+                      style={{ width: `${selectedClaim.confidenceLevel || 0}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1">{selectedClaim.confidenceLevel || 0}% prediction confidence</p>
+                </div>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-3 mb-4">
-                <div
-                  className={`h-3 rounded-full transition-all duration-500 ${getRiskLevel(selectedClaim.fraudScore).color === "red" ? "bg-gradient-to-r from-red-500 to-red-600" : getRiskLevel(selectedClaim.fraudScore).color === "amber" ? "bg-gradient-to-r from-amber-500 to-amber-600" : "bg-gradient-to-r from-green-500 to-green-600"}`}
-                  style={{ width: `${selectedClaim.fraudScore}%` }}
-                ></div>
-              </div>
+
+              {/* Fraud Factors Breakdown */}
+              {selectedClaim.fraudFactors && (
+                <div className="space-y-3 mb-4">
+                  <p className="text-sm font-semibold text-slate-700">Risk Factor Breakdown:</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(selectedClaim.fraudFactors).map(([key, factor]) => (
+                      <div key={key} className="bg-white rounded-lg p-3 border border-slate-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-medium text-slate-600">
+                            {key === 'amountRisk' ? 'Amount Analysis' : 
+                             key === 'temporalRisk' ? 'Timing Patterns' :
+                             key === 'dataCompleteness' ? 'Data Quality' :
+                             'Historical Patterns'}
+                          </span>
+                          <span className="text-xs font-bold text-slate-900">{factor.contribution}pts</span>
+                        </div>
+                        <div className="w-full bg-slate-100 rounded-full h-2 mb-1">
+                          <div
+                            className={`h-2 rounded-full ${factor.score > 70 ? 'bg-red-500' : factor.score > 40 ? 'bg-amber-500' : 'bg-green-500'}`}
+                            style={{ width: `${factor.score}%` }}
+                          ></div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-slate-500">{factor.score}% risk</span>
+                          <span className="text-xs text-slate-500">Weight: {factor.weight}%</span>
+                        </div>
+                        {factor.reasons && factor.reasons.length > 0 && (
+                          <div className="mt-2 pt-2 border-t border-slate-100">
+                            {factor.reasons.map((reason, idx) => (
+                              <p key={idx} className="text-xs text-slate-600 flex items-start gap-1">
+                                <span className="text-amber-600 mt-0.5">•</span>
+                                <span>{reason}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Risk Indicators */}
               {selectedClaim.fraudFlags.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-700">Risk Indicators:</p>
+                  <p className="text-sm font-medium text-slate-700">Additional Risk Indicators:</p>
                   <div className="flex flex-wrap gap-2">
                     {selectedClaim.fraudFlags.map((flag, index) => (
                       <Badge key={index} variant="warning">
